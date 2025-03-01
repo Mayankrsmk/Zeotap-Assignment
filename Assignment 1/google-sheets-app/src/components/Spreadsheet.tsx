@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, closestCenter } from '@dnd-kit/core';
 import DraggableCell from './DraggableCell';
 import DroppableArea from './DroppableArea';
@@ -124,7 +124,7 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
   };
 
   // Function to handle scroll and dynamically load more rows/columns
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
     
     const { scrollTop, scrollLeft, clientHeight, clientWidth, scrollHeight, scrollWidth } = containerRef.current;
@@ -138,7 +138,7 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
     if (scrollLeft + clientWidth > scrollWidth - 100 && visibleCols < cells[0].length) {
       setVisibleCols(Math.min(cells[0].length, visibleCols + 5));
     }
-  };
+  }, [visibleRows, visibleCols, cells]);
   
   // Add scroll event listener
   useEffect(() => {
@@ -147,7 +147,7 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
       container.addEventListener('scroll', handleScroll);
       return () => container.removeEventListener('scroll', handleScroll);
     }
-  }, [visibleRows, visibleCols]);
+  }, [visibleRows, visibleCols, handleScroll]);
 
   return (
     <div 
@@ -190,7 +190,7 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
                 {rowIndex + 1}
               </div>
               
-              {row.map((cellValue, colIndex) => (
+              {row.map((_cellValue, colIndex) => (
                 <DroppableArea 
                   key={`${rowIndex}-${colIndex}`} 
                   id={`${rowIndex}-${colIndex}`}
