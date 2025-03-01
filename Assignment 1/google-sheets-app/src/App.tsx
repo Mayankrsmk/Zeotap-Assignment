@@ -52,7 +52,7 @@ const App = () => {
     const updatedCells = [...cells];
     updatedCells[row][col] = newValue;
     setCells(updatedCells);
-    
+
     // If this is a formula, we need to evaluate it
     if (newValue.startsWith('=')) {
       try {
@@ -70,7 +70,7 @@ const App = () => {
   const updateDependencies = (row: number, col: number) => {
     const cellKey = `${row},${col}`;
     const dependentCells = dependencies.get(cellKey) || new Set();
-    
+
     // Create a copy of the cells array to work with
     const updatedCells = [...cells];
 
@@ -79,14 +79,14 @@ const App = () => {
       // Extract cell references from the formula
       const formula = cells[row][col].slice(1);
       const cellRefs = extractCellReferences(formula);
-      
+
       // Update dependencies for each referenced cell
       cellRefs.forEach(ref => {
         const [refRow, refCol] = ref.split(',').map(Number);
         const refKey = `${refRow},${refCol}`;
         const deps = dependencies.get(refKey) || new Set();
         deps.add(cellKey);
-        
+
         // Create a new map to trigger re-render
         const newDependencies = new Map(dependencies);
         newDependencies.set(refKey, deps);
@@ -108,7 +108,7 @@ const App = () => {
     // Simple regex to match cell references like A1, B2, etc.
     const cellRefRegex = /[A-Z]+[0-9]+/g;
     const matches = formula.match(cellRefRegex) || [];
-    
+
     // Convert cell references to row,col format
     return matches.map(ref => {
       const col = ref.charCodeAt(0) - 65; // A=0, B=1, etc.
@@ -157,10 +157,10 @@ const App = () => {
   const handleSave = () => {
     // Create a modal dialog to get the filename
     const filename = prompt("Enter a name for your spreadsheet:", "My Spreadsheet");
-    
+
     // If user cancels or enters an empty name, abort
     if (!filename) return;
-    
+
     // Prepare the data to save
     const dataToSave = {
       cells,
@@ -170,11 +170,11 @@ const App = () => {
       fontColors,
       charts
     };
-    
+
     // Convert to JSON and create a blob
     const jsonData = JSON.stringify(dataToSave, null, 2);
     const blob = new Blob([jsonData], { type: 'application/json' });
-    
+
     // Create a download link and trigger it
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -182,7 +182,7 @@ const App = () => {
     link.download = `${filename}.json`;
     document.body.appendChild(link);
     link.click();
-    
+
     // Clean up
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
@@ -249,21 +249,21 @@ const App = () => {
   const handleAddRow = () => {
     // Add a row after the currently selected row, or at the end if no row is selected
     const rowIndex = editingCell ? editingCell.row + 1 : cells.length;
-    
+
     // Create updated arrays with a new row inserted
     const updatedCells = [...cells];
     const updatedBoldCells = [...boldCells];
     const updatedItalicCells = [...italicCells];
     const updatedFontSizes = [...fontSizes];
     const updatedFontColors = [...fontColors];
-    
+
     // Insert the new row
     updatedCells.splice(rowIndex, 0, Array(cells[0].length).fill(''));
     updatedBoldCells.splice(rowIndex, 0, Array(cells[0].length).fill(false));
     updatedItalicCells.splice(rowIndex, 0, Array(cells[0].length).fill(false));
     updatedFontSizes.splice(rowIndex, 0, Array(cells[0].length).fill('14'));
     updatedFontColors.splice(rowIndex, 0, Array(cells[0].length).fill('#000000'));
-    
+
     // Update state
     setCells(updatedCells);
     setBoldCells(updatedBoldCells);
@@ -275,38 +275,38 @@ const App = () => {
   const handleAddColumn = () => {
     // Add a column after the currently selected column, or at the end if no column is selected
     const colIndex = editingCell ? editingCell.col + 1 : cells[0].length;
-    
+
     // Create updated arrays with a new column inserted
     const updatedCells = cells.map(row => {
       const newRow = [...row];
       newRow.splice(colIndex, 0, '');
       return newRow;
     });
-    
+
     const updatedBoldCells = boldCells.map(row => {
       const newRow = [...row];
       newRow.splice(colIndex, 0, false);
       return newRow;
     });
-    
+
     const updatedItalicCells = italicCells.map(row => {
       const newRow = [...row];
       newRow.splice(colIndex, 0, false);
       return newRow;
     });
-    
+
     const updatedFontSizes = fontSizes.map(row => {
       const newRow = [...row];
       newRow.splice(colIndex, 0, '14');
       return newRow;
     });
-    
+
     const updatedFontColors = fontColors.map(row => {
       const newRow = [...row];
       newRow.splice(colIndex, 0, '#000000');
       return newRow;
     });
-    
+
     // Update state
     setCells(updatedCells);
     setBoldCells(updatedBoldCells);
@@ -318,28 +318,28 @@ const App = () => {
   const handleDeleteRow = () => {
     if (editingCell && cells.length > 1) {
       const { row } = editingCell;
-      
+
       // Create updated arrays with the row removed
       const updatedCells = [...cells];
       const updatedBoldCells = [...boldCells];
       const updatedItalicCells = [...italicCells];
       const updatedFontSizes = [...fontSizes];
       const updatedFontColors = [...fontColors];
-      
+
       // Remove the row
       updatedCells.splice(row, 1);
       updatedBoldCells.splice(row, 1);
       updatedItalicCells.splice(row, 1);
       updatedFontSizes.splice(row, 1);
       updatedFontColors.splice(row, 1);
-      
+
       // Update state
       setCells(updatedCells);
       setBoldCells(updatedBoldCells);
       setItalicCells(updatedItalicCells);
       setFontSizes(updatedFontSizes);
       setFontColors(updatedFontColors);
-      
+
       // Clear editing cell
       setEditingCell(null);
     }
@@ -348,45 +348,45 @@ const App = () => {
   const handleDeleteColumn = () => {
     if (editingCell && cells[0].length > 1) {
       const { col } = editingCell;
-      
+
       // Create updated arrays with the column removed
       const updatedCells = cells.map(row => {
         const newRow = [...row];
         newRow.splice(col, 1);
         return newRow;
       });
-      
+
       const updatedBoldCells = boldCells.map(row => {
         const newRow = [...row];
         newRow.splice(col, 1);
         return newRow;
       });
-      
+
       const updatedItalicCells = italicCells.map(row => {
         const newRow = [...row];
         newRow.splice(col, 1);
         return newRow;
       });
-      
+
       const updatedFontSizes = fontSizes.map(row => {
         const newRow = [...row];
         newRow.splice(col, 1);
         return newRow;
       });
-      
+
       const updatedFontColors = fontColors.map(row => {
         const newRow = [...row];
         newRow.splice(col, 1);
         return newRow;
       });
-      
+
       // Update state
       setCells(updatedCells);
       setBoldCells(updatedBoldCells);
       setItalicCells(updatedItalicCells);
       setFontSizes(updatedFontSizes);
       setFontColors(updatedFontColors);
-      
+
       // Clear editing cell
       setEditingCell(null);
     }
@@ -399,22 +399,22 @@ const App = () => {
           {/* Google Sheets-like icon */}
           <div className="flex-shrink-0">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="28" height="28">
-              <path fill="#43A047" d="M37,45H11c-1.657,0-3-1.343-3-3V6c0-1.657,1.343-3,3-3h19l10,10v29C40,43.657,38.657,45,37,45z"/>
-              <path fill="#C8E6C9" d="M40 13L30 13 30 3z"/>
-              <path fill="#2E7D32" d="M30 13L40 13 30 3z"/>
-              <path fill="#E8F5E9" d="M31,23H17v-2h14V23z M31,27H17v-2h14V27z M31,31H17v-2h14V31z M31,35H17v-2h14V35z"/>
+              <path fill="#43A047" d="M37,45H11c-1.657,0-3-1.343-3-3V6c0-1.657,1.343-3,3-3h19l10,10v29C40,43.657,38.657,45,37,45z" />
+              <path fill="#C8E6C9" d="M40 13L30 13 30 3z" />
+              <path fill="#2E7D32" d="M30 13L40 13 30 3z" />
+              <path fill="#E8F5E9" d="M31,23H17v-2h14V23z M31,27H17v-2h14V27z M31,31H17v-2h14V31z M31,35H17v-2h14V35z" />
             </svg>
           </div>
           <h1 className="text-lg font-medium text-gray-800 ml-2">Google Sheets</h1>
         </div>
       </header>
-      
-      <Toolbar 
-        onBold={handleBold} 
-        onItalic={handleItalic} 
-        onTrim={handleTrim} 
-        onUpper={handleUpper} 
-        onLower={handleLower} 
+
+      <Toolbar
+        onBold={handleBold}
+        onItalic={handleItalic}
+        onTrim={handleTrim}
+        onUpper={handleUpper}
+        onLower={handleLower}
         onRemoveDuplicates={handleRemoveDuplicates}
         onSave={handleSave}
         onLoad={handleLoad}
@@ -426,51 +426,52 @@ const App = () => {
         onChangeFontSize={handleChangeFontSize}
         onChangeFontColor={handleChangeFontColor}
       />
-      
+
       <div className="max-w-[95%] mx-auto p-4">
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <FindReplace cells={cells} setCells={setCells} />
-          
+
           <div className="spreadsheet-wrapper overflow-hidden border border-gray-300 rounded-lg">
-            <Spreadsheet 
-              cells={cells} 
-              setCells={updateCell} 
-              boldCells={boldCells} 
-              italicCells={italicCells} 
+            <Spreadsheet
+              cells={cells}
+              setCells={updateCell}
+              boldCells={boldCells}
+              italicCells={italicCells}
               fontSizes={fontSizes}
               fontColors={fontColors}
               setBoldCells={setBoldCells}
               setItalicCells={setItalicCells}
-              setEditingCell={setEditingCell} 
+              setEditingCell={setEditingCell}
             />
           </div>
         </div>
-        
+
         <div className="mt-4 bg-white shadow rounded-lg p-4">
           <FunctionTester cells={cells} />
         </div>
       </div>
-      
+
       {/* Hidden file input for loading */}
-      <input 
-        type="file" 
-        ref={fileInputRef} 
-        style={{ display: 'none' }} 
-        accept=".json" 
-        onChange={handleFileChange} 
+      <input
+        type="file"
+        ref={fileInputRef}
+        style={{ display: 'none' }}
+        accept=".json"
+        onChange={handleFileChange}
       />
-      
+
       {/* Chart configuration modal */}
       {showChartConfig && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <ChartConfig 
-            cells={cells} 
-            onCreateChart={handleChartConfigSubmit} 
-            onCancel={handleChartConfigCancel} 
+        <div className="fixed inset-0 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
+          <ChartConfig
+            cells={cells}
+            onCreateChart={handleChartConfigSubmit}
+            onCancel={handleChartConfigCancel}
           />
         </div>
       )}
-      
+
+
       {/* Chart display area */}
       {charts.length > 0 && (
         <div className="max-w-[95%] mx-auto mt-4 p-4 bg-white shadow rounded-lg">
@@ -479,7 +480,7 @@ const App = () => {
             {charts.map((chart, index) => (
               <div key={index} className="chart-container border rounded-lg p-4 shadow-sm">
                 <ChartComponent chartConfig={chart} />
-                <button 
+                <button
                   onClick={() => setCharts(charts.filter((_, i) => i !== index))}
                   className="mt-3 bg-red-50 text-red-600 px-3 py-1 rounded hover:bg-red-100"
                 >
