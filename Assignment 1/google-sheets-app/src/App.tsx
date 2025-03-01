@@ -39,7 +39,19 @@ const App = () => {
     const updatedCells = [...cells];
     updatedCells[row][col] = newValue;
     setCells(updatedCells);
-    updateDependencies(row, col); // Update dependencies when a cell changes
+    
+    // If this is a formula, we need to evaluate it
+    if (newValue.startsWith('=')) {
+      try {
+        // This will trigger any dependent cells to update
+        updateDependencies(row, col);
+      } catch (error) {
+        console.error(`Error updating formula: ${error}`);
+      }
+    } else {
+      // For non-formula cells, still update dependencies
+      updateDependencies(row, col);
+    }
   };
 
   const updateDependencies = (row: number, col: number) => {
@@ -100,6 +112,7 @@ const App = () => {
       cells,
       boldCells,
       italicCells,
+      charts,
     };
     
     const blob = new Blob([JSON.stringify(spreadsheetData)], {type: 'application/json'});
@@ -127,6 +140,7 @@ const App = () => {
         setCells(data.cells || []);
         setBoldCells(data.boldCells || []);
         setItalicCells(data.italicCells || []);
+        setCharts(data.charts || []);
       } catch (error) {
         alert('Error loading spreadsheet: ' + error);
       }
@@ -162,7 +176,15 @@ const App = () => {
         onCreateChart={handleCreateChart}
       />
       <FindReplace cells={cells} setCells={setCells} />
-      <Spreadsheet cells={cells} setCells={updateCell} boldCells={boldCells} italicCells={italicCells} setEditingCell={setEditingCell} />
+      <Spreadsheet 
+        cells={cells} 
+        setCells={updateCell} 
+        boldCells={boldCells} 
+        italicCells={italicCells} 
+        setBoldCells={setBoldCells}
+        setItalicCells={setItalicCells}
+        setEditingCell={setEditingCell} 
+      />
       <FunctionTester cells={cells} />
       
       {/* Hidden file input for loading */}

@@ -18,10 +18,22 @@ const Cell: React.FC<CellProps> = ({ value, onChange, isEditing, onEdit, style, 
   // Determine if the cell contains a formula result
   const isFormulaResult = value.startsWith('=');
   
+  // Update inputValue when value changes (for drag operations)
+  React.useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+  
+  const handleClick = (e: React.MouseEvent) => {
+    // Only trigger edit if not dragging
+    if (!e.defaultPrevented) {
+      onEdit();
+    }
+  };
+  
   return (
     <div
       className={`cell ${isFormulaResult ? 'bg-blue-50' : ''}`}
-      onClick={onEdit}
+      onClick={handleClick}
       style={style}
     >
       {isEditing ? (
@@ -31,6 +43,7 @@ const Cell: React.FC<CellProps> = ({ value, onChange, isEditing, onEdit, style, 
           onChange={(e) => setInputValue(e.target.value)}
           onBlur={() => { onChange(inputValue); onEdit(); }}
           className="border p-1 w-full h-full"
+          autoFocus
         />
       ) : (
         <span 
