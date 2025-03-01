@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, closestCenter } from '@dnd-kit/core';
 import Cell from './Cell';
 import DraggableCell from './DraggableCell';
@@ -19,6 +19,11 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
   const [editingCellLocal, setEditingCellLocal] = useState<{ row: number; col: number } | null>(null);
   const [formulaValues, setFormulaValues] = useState<Map<string, string>>(new Map());
   const [activeDragData, setActiveDragData] = useState<{ value: string, rowIndex: number, colIndex: number } | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  
+  // Add state to track visible rows and columns
+  const [visibleRows, setVisibleRows] = useState<number>(10); // Initially show 10 rows
+  const [visibleCols, setVisibleCols] = useState<number>(10); // Initially show 10 columns (A-J)
 
   const handleCellChange = (row: number, col: number, newValue: string) => {
     if (newValue.startsWith('=')) {
@@ -117,68 +122,131 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
     setActiveDragData(null);
   };
 
+  // Function to handle scroll and dynamically load more rows/columns
+  const handleScroll = () => {
+    if (!containerRef.current) return;
+    
+    const { scrollTop, scrollLeft, clientHeight, clientWidth, scrollHeight, scrollWidth } = containerRef.current;
+    
+    // If scrolled near the bottom, show more rows
+    if (scrollTop + clientHeight > scrollHeight - 100 && visibleRows < cells.length) {
+      setVisibleRows(Math.min(cells.length, visibleRows + 5));
+    }
+    
+    // If scrolled near the right edge, show more columns
+    if (scrollLeft + clientWidth > scrollWidth - 100 && visibleCols < cells[0].length) {
+      setVisibleCols(Math.min(cells[0].length, visibleCols + 5));
+    }
+  };
+  
+  // Add scroll event listener
+  useEffect(() => {
+    const container = containerRef.current;
+    if (container) {
+      container.addEventListener('scroll', handleScroll);
+      return () => container.removeEventListener('scroll', handleScroll);
+    }
+  }, [visibleRows, visibleCols]);
+
   return (
-    <DndContext
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      collisionDetection={closestCenter}
+    <div 
+      className="spreadsheet-container overflow-auto max-h-[70vh] max-w-full border border-gray-300 rounded-md" 
+      ref={containerRef}
+      style={{ 
+        height: '500px',
+        width: '100%',
+        overflowX: 'auto',
+        overflowY: 'auto'
+      }}
     >
-      <div className="spreadsheet border border-gray-300">
-        {cells.map((row, rowIndex) => (
-          <div key={rowIndex} className="flex">
-            {row.map((cellValue, colIndex) => (
-              <DroppableArea 
-                key={`${rowIndex}-${colIndex}`} 
-                id={`${rowIndex}-${colIndex}`}
-                style={{
-                  border: '1px solid #d1d5db',
-                  width: '8rem',
-                  height: '2.5rem'
-                }}
-              >
-                <DraggableCell
-                  id={`${rowIndex}-${colIndex}`}
-                  value={getCellDisplayValue(rowIndex, colIndex)}
-                  onChange={(newValue) => handleCellChange(rowIndex, colIndex, newValue)}
-                  isEditing={editingCellLocal?.row === rowIndex && editingCellLocal?.col === colIndex}
-                  onEdit={() => handleEditCell(rowIndex, colIndex)}
-                  style={{
-                    padding: '0.5rem',
-                    width: '100%',
-                    height: '100%'
-                  }}
-                  isBold={boldCells[rowIndex][colIndex]}
-                  isItalic={italicCells[rowIndex][colIndex]}
-                  rowIndex={rowIndex}
-                  colIndex={colIndex}
-                />
-              </DroppableArea>
-            ))}
+      {/* Column headers A, B, C, etc. */}
+      <div className="flex sticky top-0 z-10" style={{ minWidth: 'max-content' }}>
+        <div className="w-10 h-8 bg-gray-100 border-r border-b border-gray-300 flex items-center justify-center sticky left-0 z-20"></div>
+        {Array.from({ length: cells[0].length }).map((_, colIndex) => (
+          <div 
+            key={colIndex} 
+            className="bg-gray-100 border-r border-b border-gray-300 flex items-center justify-center font-medium text-gray-600"
+            style={{ width: '100px', height: '32px' }}
+          >
+            {String.fromCharCode(65 + colIndex)}
           </div>
         ))}
       </div>
       
-      {/* Drag overlay for showing the dragged cell */}
-      <DragOverlay>
-        {activeDragData ? (
-          <div 
-            className="bg-white border shadow-lg"
-            style={{
-              padding: '0.5rem',
-              width: '8rem',
-              height: '2.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: boldCells[activeDragData.rowIndex][activeDragData.colIndex] ? 'bold' : 'normal',
-              fontStyle: italicCells[activeDragData.rowIndex][activeDragData.colIndex] ? 'italic' : 'normal'
-            }}
-          >
-            {activeDragData.value}
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+      <DndContext
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        collisionDetection={closestCenter}
+      >
+        <div className="spreadsheet" style={{ minWidth: 'max-content' }}>
+          {cells.map((row, rowIndex) => (
+            <div key={rowIndex} className="flex">
+              {/* Row headers 1, 2, 3, etc. */}
+              <div 
+                className="bg-gray-100 border-r border-b border-gray-300 flex items-center justify-center font-medium text-gray-600 sticky left-0 z-10"
+                style={{ width: '40px', height: '28px' }}
+              >
+                {rowIndex + 1}
+              </div>
+              
+              {row.map((cellValue, colIndex) => (
+                <DroppableArea 
+                  key={`${rowIndex}-${colIndex}`} 
+                  id={`${rowIndex}-${colIndex}`}
+                  style={{
+                    border: '1px solid #e5e7eb',
+                    width: '100px',
+                    height: '28px'
+                  }}
+                >
+                  <DraggableCell
+                    id={`${rowIndex}-${colIndex}`}
+                    value={getCellDisplayValue(rowIndex, colIndex)}
+                    onChange={(newValue) => handleCellChange(rowIndex, colIndex, newValue)}
+                    isEditing={editingCellLocal?.row === rowIndex && editingCellLocal?.col === colIndex}
+                    onEdit={() => handleEditCell(rowIndex, colIndex)}
+                    style={{
+                      width: '100%',
+                      height: '100%'
+                    }}
+                    isBold={boldCells[rowIndex][colIndex]}
+                    isItalic={italicCells[rowIndex][colIndex]}
+                    rowIndex={rowIndex}
+                    colIndex={colIndex}
+                  />
+                </DroppableArea>
+              ))}
+            </div>
+          ))}
+        </div>
+        
+        {/* Drag overlay for showing the dragged cell */}
+        <DragOverlay>
+          {activeDragData ? (
+            <div 
+              className="bg-white border shadow-lg"
+              style={{
+                padding: '0.25rem',
+                width: '100px',
+                height: '28px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: boldCells[activeDragData.rowIndex][activeDragData.colIndex] ? 'bold' : 'normal',
+                fontStyle: italicCells[activeDragData.rowIndex][activeDragData.colIndex] ? 'italic' : 'normal'
+              }}
+            >
+              {activeDragData.value}
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+      
+      {/* Scroll indicators */}
+      {/* <div className="absolute bottom-2 right-2 bg-white px-2 py-1 text-xs text-gray-500 rounded shadow-sm">
+        Scroll to see more rows and columns
+      </div> */}
+    </div>
   );
 };
 

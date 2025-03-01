@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useDraggable } from '@dnd-kit/core';
 import { CSS } from '@dnd-kit/utilities';
-import Cell from './Cell';
 
 interface DraggableCellProps {
   id: string;
@@ -77,7 +76,7 @@ const DraggableCell: React.FC<DraggableCellProps> = ({
   return (
     <div
       ref={setNodeRef}
-      className={`cell ${isFormulaResult ? 'bg-blue-50' : ''}`}
+      className={`cell ${isFormulaResult ? 'bg-blue-50' : ''} hover:bg-gray-50 transition-colors`}
       onMouseDown={handleMouseDown}
       onMouseUp={handleMouseUp}
       style={cellStyle}
@@ -98,13 +97,13 @@ const DraggableCell: React.FC<DraggableCellProps> = ({
               onEdit(); // Exit edit mode on Enter
             }
           }}
-          className="border p-1 w-full h-full"
+          className="border border-blue-500 p-1 w-full h-full outline-none shadow-sm"
           autoFocus
         />
       ) : (
         <span 
-          className={`flex items-center justify-center h-full ${isBold ? 'font-bold' : ''} ${isItalic ? 'italic' : ''}`}
-          title={isFormulaResult ? `Formula: ${value}` : ''}
+          className={`flex items-center px-4 h-full truncate ${isBold ? 'font-bold' : ''} ${isItalic ? 'italic' : ''}`}
+          title={isFormulaResult ? `Formula: ${value}` : value}
         >
           {value}
         </span>

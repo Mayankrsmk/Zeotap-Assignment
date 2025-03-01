@@ -51,15 +51,15 @@ const ChartConfig: React.FC<ChartConfigProps> = ({ cells, onCreateChart, onCance
   };
 
   return (
-    <div className="chart-config p-4 border rounded bg-white shadow-lg">
-      <h2 className="text-xl font-bold mb-4">Create Chart</h2>
+    <div className="chart-config bg-white rounded-lg shadow-xl p-6 max-w-lg w-full">
+      <h2 className="text-xl font-medium mb-6 text-gray-800">Create Chart</h2>
       
       <div className="mb-4">
-        <label className="block mb-1">Chart Type</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Chart Type</label>
         <select 
           value={chartType} 
           onChange={(e) => setChartType(e.target.value)}
-          className="border p-1 w-full"
+          className="border border-gray-300 rounded-md p-2 w-full focus:ring-blue-500 focus:border-blue-500"
         >
           <option value="bar">Bar Chart</option>
           <option value="line">Line Chart</option>
@@ -69,39 +69,39 @@ const ChartConfig: React.FC<ChartConfigProps> = ({ cells, onCreateChart, onCance
       </div>
       
       <div className="mb-4">
-        <label className="block mb-1">Data Range</label>
+        <label className="block text-sm font-medium text-gray-700 mb-1">Data Range</label>
         <input 
           type="text" 
           value={dataRange} 
           onChange={(e) => setDataRange(e.target.value)}
           placeholder="e.g., A1:B5" 
-          className="border p-1 w-full"
+          className="border border-gray-300 rounded-md p-2 w-full focus:ring-blue-500 focus:border-blue-500"
         />
         <p className="text-sm text-gray-500 mt-1">
           First row should contain headers, first column should contain labels
         </p>
       </div>
       
-      <div className="mb-4">
-        <label className="block mb-1">Chart Title</label>
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Chart Title</label>
         <input 
           type="text" 
           value={title} 
           onChange={(e) => setTitle(e.target.value)}
-          className="border p-1 w-full"
+          className="border border-gray-300 rounded-md p-2 w-full focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
       
-      <div className="flex justify-end space-x-2">
+      <div className="flex justify-end space-x-3">
         <button 
           onClick={onCancel}
-          className="bg-gray-300 p-2 rounded"
+          className="px-4 py-2 bg-gray-100 text-gray-800 rounded-md hover:bg-gray-200 transition-colors"
         >
           Cancel
         </button>
         <button 
           onClick={handleSubmit}
-          className="bg-blue-500 text-white p-2 rounded"
+          className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
         >
           Create Chart
         </button>
