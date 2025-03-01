@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { DndContext, DragEndEvent, DragStartEvent, DragOverlay, closestCenter } from '@dnd-kit/core';
-import Cell from './Cell';
 import DraggableCell from './DraggableCell';
 import DroppableArea from './DroppableArea';
 import { evaluateFormula } from '../utils/parser';
@@ -17,7 +16,7 @@ interface SpreadsheetProps {
   setEditingCell: React.Dispatch<React.SetStateAction<{ row: number; col: number } | null>>;
 }
 
-const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, italicCells, fontSizes, fontColors, setBoldCells, setItalicCells, setEditingCell }) => {
+const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, italicCells, fontSizes, fontColors, setEditingCell }) => {
   const [editingCellLocal, setEditingCellLocal] = useState<{ row: number; col: number } | null>(null);
   const [formulaValues, setFormulaValues] = useState<Map<string, string>>(new Map());
   const [activeDragData, setActiveDragData] = useState<{ value: string, rowIndex: number, colIndex: number } | null>(null);
@@ -108,7 +107,7 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
       newItalicCells[targetRow][targetCol] = italicCells[sourceRow][sourceCol];
       
       // Clear the source cell if it's a move operation (not holding Shift key)
-      if (!event.activatorEvent.shiftKey) {
+      if (!(event.activatorEvent as MouseEvent).shiftKey) {
         setCells(sourceRow, sourceCol, '');
         
         // If this was a formula, remove its entry from formulaValues
