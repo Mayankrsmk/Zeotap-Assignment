@@ -3,8 +3,11 @@ import React, { useState, useRef, useEffect } from 'react';
 interface ChartConfigProps {
   cells: string[][];
   onCreateChart: (config: {
-    type: string;
-    data: any[];
+    type: 'bar' | 'line' | 'pie' | 'area';
+    data: Array<{
+      name: string;
+      [key: string]: string | number;
+    }>;
     title: string;
     dataKeys: string[];
   }) => void;
@@ -42,9 +45,9 @@ const ChartConfig: React.FC<ChartConfigProps> = ({ cells, onCreateChart, onCance
     const endRow = parseInt(end.substring(1)) - 1;
     
     // Extract data from the specified range
-    const data: any[] = [];
+    const data: Array<{name: string; [key: string]: string | number}> = [];
     for (let i = startRow + 1; i <= endRow; i++) { // Skip header row
-      const row: any = {};
+      const row: {name: string; [key: string]: string | number} = { name: '' };
       for (let j = startCol; j <= endCol; j++) {
         if (j === startCol) {
           // First column is used as name
@@ -64,7 +67,7 @@ const ChartConfig: React.FC<ChartConfigProps> = ({ cells, onCreateChart, onCance
     }
     
     onCreateChart({
-      type: chartType,
+      type: chartType as 'bar' | 'line' | 'pie' | 'area',
       data,
       title: chartTitle,
       dataKeys

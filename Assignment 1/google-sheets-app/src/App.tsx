@@ -7,13 +7,24 @@ import ChartConfig from './components/ChartConfig'
 import ChartComponent from './components/ChartComponent'
 import { evaluateFormula } from './utils/parser'
 
+// Define a ChartConfig type
+type ChartConfig = {
+  type: 'bar' | 'line' | 'pie' | 'area';
+  data: Array<{
+    name: string;
+    [key: string]: string | number;
+  }>;
+  title: string;
+  dataKeys: string[];
+};
+
 const App = () => {
   const [cells, setCells] = useState<string[][]>(Array.from({ length: 50 }, () => Array(26).fill('')));
   const [boldCells, setBoldCells] = useState<boolean[][]>(Array.from({ length: 50 }, () => Array(26).fill(false)));
   const [italicCells, setItalicCells] = useState<boolean[][]>(Array.from({ length: 50 }, () => Array(26).fill(false)));
   const [editingCell, setEditingCell] = useState<{ row: number; col: number } | null>(null);
   const [dependencies, setDependencies] = useState<Map<string, Set<string>>>(new Map()); // Track dependencies
-  const [charts, setCharts] = useState<any[]>([]);
+  const [charts, setCharts] = useState<ChartConfig[]>([]);
   const [showChartConfig, setShowChartConfig] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [fontSizes, setFontSizes] = useState<string[][]>(Array.from({ length: 50 }, () => Array(26).fill('14')));
@@ -63,6 +74,26 @@ const App = () => {
     // Create a copy of the cells array to work with
     const updatedCells = [...cells];
 
+    // Update the dependencies map when needed
+    if (cells[row][col].startsWith('=')) {
+      // Extract cell references from the formula
+      const formula = cells[row][col].slice(1);
+      const cellRefs = extractCellReferences(formula);
+      
+      // Update dependencies for each referenced cell
+      cellRefs.forEach(ref => {
+        const [refRow, refCol] = ref.split(',').map(Number);
+        const refKey = `${refRow},${refCol}`;
+        const deps = dependencies.get(refKey) || new Set();
+        deps.add(cellKey);
+        
+        // Create a new map to trigger re-render
+        const newDependencies = new Map(dependencies);
+        newDependencies.set(refKey, deps);
+        setDependencies(newDependencies);
+      });
+    }
+
     dependentCells.forEach((dependentCell) => {
       const [depRow, depCol] = dependentCell.split(',').map(Number);
       const result = evaluateFormula(updatedCells[depRow][depCol].slice(1), updatedCells);
@@ -70,6 +101,20 @@ const App = () => {
     });
 
     setCells(updatedCells);
+  };
+
+  // Helper function to extract cell references from a formula
+  const extractCellReferences = (formula: string): string[] => {
+    // Simple regex to match cell references like A1, B2, etc.
+    const cellRefRegex = /[A-Z]+[0-9]+/g;
+    const matches = formula.match(cellRefRegex) || [];
+    
+    // Convert cell references to row,col format
+    return matches.map(ref => {
+      const col = ref.charCodeAt(0) - 65; // A=0, B=1, etc.
+      const row = parseInt(ref.substring(1)) - 1; // 1-based to 0-based
+      return `${row},${col}`;
+    });
   };
 
   const handleTrim = () => {
@@ -174,7 +219,7 @@ const App = () => {
     setShowChartConfig(true);
   };
 
-  const handleChartConfigSubmit = (chartConfig: any) => {
+  const handleChartConfigSubmit = (chartConfig: ChartConfig) => {
     setCharts([...charts, chartConfig]);
     setShowChartConfig(false);
   };

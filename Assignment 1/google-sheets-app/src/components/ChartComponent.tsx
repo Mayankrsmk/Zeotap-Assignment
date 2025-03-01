@@ -6,8 +6,11 @@ import {
 
 interface ChartComponentProps {
   chartConfig: {
-    type: string;
-    data: any[];
+    type: 'bar' | 'line' | 'pie' | 'area';
+    data: Array<{
+      name: string;
+      [key: string]: string | number;
+    }>;
     title: string;
     dataKeys: string[];
   };
@@ -57,7 +60,7 @@ const ChartComponent: React.FC<ChartComponentProps> = ({ chartConfig }) => {
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
               <Pie
-                data={data.map((item, index) => ({
+                data={data.map((item) => ({
                   name: item.name,
                   value: Number(item[dataKeys[0]]) || 0
                 }))}

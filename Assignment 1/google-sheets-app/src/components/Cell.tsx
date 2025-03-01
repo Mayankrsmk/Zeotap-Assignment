@@ -12,7 +12,7 @@ interface CellProps {
   colIndex: number;
 }
 
-const Cell: React.FC<CellProps> = ({ value, onChange, isEditing, onEdit, style, isBold, isItalic, rowIndex, colIndex }) => {
+const Cell: React.FC<CellProps> = ({ value, onChange, isEditing, onEdit, style, isBold, isItalic }) => {
   const [inputValue, setInputValue] = useState(value);
   
   // Determine if the cell contains a formula result
