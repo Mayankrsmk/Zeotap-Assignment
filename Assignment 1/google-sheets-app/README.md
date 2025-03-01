@@ -1,4 +1,4 @@
-# Google Sheets Clone
+# Google Sheets Application
 
 A feature-rich spreadsheet application built with React and TypeScript that mimics core Google Sheets functionality.
 
