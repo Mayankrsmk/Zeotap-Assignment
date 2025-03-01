@@ -11,6 +11,8 @@ interface DraggableCellProps {
   style?: React.CSSProperties;
   isBold?: boolean;
   isItalic?: boolean;
+  fontSize?: string;
+  fontColor?: string;
   rowIndex: number;
   colIndex: number;
 }
@@ -24,6 +26,8 @@ const DraggableCell: React.FC<DraggableCellProps> = ({
   style, 
   isBold, 
   isItalic, 
+  fontSize = '14',
+  fontColor = '#000000',
   rowIndex, 
   colIndex 
 }) => {
@@ -103,6 +107,7 @@ const DraggableCell: React.FC<DraggableCellProps> = ({
       ) : (
         <span 
           className={`flex items-center px-4 h-full truncate ${isBold ? 'font-bold' : ''} ${isItalic ? 'italic' : ''}`}
+          style={{ fontSize: `${fontSize}px`, color: fontColor }}
           title={isFormulaResult ? `Formula: ${value}` : value}
         >
           {value}

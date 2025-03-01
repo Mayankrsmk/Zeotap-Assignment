@@ -10,12 +10,14 @@ interface SpreadsheetProps {
   setCells: (row: number, col: number, newValue: string) => void;
   boldCells: boolean[][];
   italicCells: boolean[][];
+  fontSizes: string[][];
+  fontColors: string[][];
   setBoldCells: React.Dispatch<React.SetStateAction<boolean[][]>>;
   setItalicCells: React.Dispatch<React.SetStateAction<boolean[][]>>;
   setEditingCell: React.Dispatch<React.SetStateAction<{ row: number; col: number } | null>>;
 }
 
-const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, italicCells, setBoldCells, setItalicCells, setEditingCell }) => {
+const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, italicCells, fontSizes, fontColors, setBoldCells, setItalicCells, setEditingCell }) => {
   const [editingCellLocal, setEditingCellLocal] = useState<{ row: number; col: number } | null>(null);
   const [formulaValues, setFormulaValues] = useState<Map<string, string>>(new Map());
   const [activeDragData, setActiveDragData] = useState<{ value: string, rowIndex: number, colIndex: number } | null>(null);
@@ -211,6 +213,8 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
                     }}
                     isBold={boldCells[rowIndex][colIndex]}
                     isItalic={italicCells[rowIndex][colIndex]}
+                    fontSize={fontSizes[rowIndex][colIndex]}
+                    fontColor={fontColors[rowIndex][colIndex]}
                     rowIndex={rowIndex}
                     colIndex={colIndex}
                   />
@@ -233,7 +237,9 @@ const Spreadsheet: React.FC<SpreadsheetProps> = ({ cells, setCells, boldCells, i
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: boldCells[activeDragData.rowIndex][activeDragData.colIndex] ? 'bold' : 'normal',
-                fontStyle: italicCells[activeDragData.rowIndex][activeDragData.colIndex] ? 'italic' : 'normal'
+                fontStyle: italicCells[activeDragData.rowIndex][activeDragData.colIndex] ? 'italic' : 'normal',
+                fontSize: `${fontSizes[activeDragData.rowIndex][activeDragData.colIndex]}px`,
+                color: fontColors[activeDragData.rowIndex][activeDragData.colIndex]
               }}
             >
               {activeDragData.value}

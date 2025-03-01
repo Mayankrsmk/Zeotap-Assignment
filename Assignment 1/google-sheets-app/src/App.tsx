@@ -16,6 +16,8 @@ const App = () => {
   const [charts, setCharts] = useState<any[]>([]);
   const [showChartConfig, setShowChartConfig] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [fontSizes, setFontSizes] = useState<string[][]>(Array.from({ length: 50 }, () => Array(26).fill('14')));
+  const [fontColors, setFontColors] = useState<string[][]>(Array.from({ length: 50 }, () => Array(26).fill('#000000')));
 
   const handleBold = () => {
     if (editingCell) {
@@ -108,19 +110,37 @@ const App = () => {
   };
 
   const handleSave = () => {
-    const spreadsheetData = {
+    // Create a modal dialog to get the filename
+    const filename = prompt("Enter a name for your spreadsheet:", "My Spreadsheet");
+    
+    // If user cancels or enters an empty name, abort
+    if (!filename) return;
+    
+    // Prepare the data to save
+    const dataToSave = {
       cells,
       boldCells,
       italicCells,
-      charts,
+      fontSizes,
+      fontColors,
+      charts
     };
     
-    const blob = new Blob([JSON.stringify(spreadsheetData)], {type: 'application/json'});
+    // Convert to JSON and create a blob
+    const jsonData = JSON.stringify(dataToSave, null, 2);
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    
+    // Create a download link and trigger it
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'spreadsheet.json';
-    a.click();
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `${filename}.json`;
+    document.body.appendChild(link);
+    link.click();
+    
+    // Clean up
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   const handleLoad = () => {
@@ -140,6 +160,8 @@ const App = () => {
         setCells(data.cells || []);
         setBoldCells(data.boldCells || []);
         setItalicCells(data.italicCells || []);
+        setFontSizes(data.fontSizes || Array.from({ length: data.cells.length }, () => Array(data.cells[0].length).fill('14')));
+        setFontColors(data.fontColors || Array.from({ length: data.cells.length }, () => Array(data.cells[0].length).fill('#000000')));
         setCharts(data.charts || []);
       } catch (error) {
         alert('Error loading spreadsheet: ' + error);
@@ -159,6 +181,170 @@ const App = () => {
 
   const handleChartConfigCancel = () => {
     setShowChartConfig(false);
+  };
+
+  const handleChangeFontSize = (size: string) => {
+    if (editingCell) {
+      const { row, col } = editingCell;
+      const updatedFontSizes = [...fontSizes];
+      updatedFontSizes[row][col] = size;
+      setFontSizes(updatedFontSizes);
+    }
+  };
+
+  const handleChangeFontColor = (color: string) => {
+    if (editingCell) {
+      const { row, col } = editingCell;
+      const updatedFontColors = [...fontColors];
+      updatedFontColors[row][col] = color;
+      setFontColors(updatedFontColors);
+    }
+  };
+
+  const handleAddRow = () => {
+    // Add a row after the currently selected row, or at the end if no row is selected
+    const rowIndex = editingCell ? editingCell.row + 1 : cells.length;
+    
+    // Create updated arrays with a new row inserted
+    const updatedCells = [...cells];
+    const updatedBoldCells = [...boldCells];
+    const updatedItalicCells = [...italicCells];
+    const updatedFontSizes = [...fontSizes];
+    const updatedFontColors = [...fontColors];
+    
+    // Insert the new row
+    updatedCells.splice(rowIndex, 0, Array(cells[0].length).fill(''));
+    updatedBoldCells.splice(rowIndex, 0, Array(cells[0].length).fill(false));
+    updatedItalicCells.splice(rowIndex, 0, Array(cells[0].length).fill(false));
+    updatedFontSizes.splice(rowIndex, 0, Array(cells[0].length).fill('14'));
+    updatedFontColors.splice(rowIndex, 0, Array(cells[0].length).fill('#000000'));
+    
+    // Update state
+    setCells(updatedCells);
+    setBoldCells(updatedBoldCells);
+    setItalicCells(updatedItalicCells);
+    setFontSizes(updatedFontSizes);
+    setFontColors(updatedFontColors);
+  };
+
+  const handleAddColumn = () => {
+    // Add a column after the currently selected column, or at the end if no column is selected
+    const colIndex = editingCell ? editingCell.col + 1 : cells[0].length;
+    
+    // Create updated arrays with a new column inserted
+    const updatedCells = cells.map(row => {
+      const newRow = [...row];
+      newRow.splice(colIndex, 0, '');
+      return newRow;
+    });
+    
+    const updatedBoldCells = boldCells.map(row => {
+      const newRow = [...row];
+      newRow.splice(colIndex, 0, false);
+      return newRow;
+    });
+    
+    const updatedItalicCells = italicCells.map(row => {
+      const newRow = [...row];
+      newRow.splice(colIndex, 0, false);
+      return newRow;
+    });
+    
+    const updatedFontSizes = fontSizes.map(row => {
+      const newRow = [...row];
+      newRow.splice(colIndex, 0, '14');
+      return newRow;
+    });
+    
+    const updatedFontColors = fontColors.map(row => {
+      const newRow = [...row];
+      newRow.splice(colIndex, 0, '#000000');
+      return newRow;
+    });
+    
+    // Update state
+    setCells(updatedCells);
+    setBoldCells(updatedBoldCells);
+    setItalicCells(updatedItalicCells);
+    setFontSizes(updatedFontSizes);
+    setFontColors(updatedFontColors);
+  };
+
+  const handleDeleteRow = () => {
+    if (editingCell && cells.length > 1) {
+      const { row } = editingCell;
+      
+      // Create updated arrays with the row removed
+      const updatedCells = [...cells];
+      const updatedBoldCells = [...boldCells];
+      const updatedItalicCells = [...italicCells];
+      const updatedFontSizes = [...fontSizes];
+      const updatedFontColors = [...fontColors];
+      
+      // Remove the row
+      updatedCells.splice(row, 1);
+      updatedBoldCells.splice(row, 1);
+      updatedItalicCells.splice(row, 1);
+      updatedFontSizes.splice(row, 1);
+      updatedFontColors.splice(row, 1);
+      
+      // Update state
+      setCells(updatedCells);
+      setBoldCells(updatedBoldCells);
+      setItalicCells(updatedItalicCells);
+      setFontSizes(updatedFontSizes);
+      setFontColors(updatedFontColors);
+      
+      // Clear editing cell
+      setEditingCell(null);
+    }
+  };
+
+  const handleDeleteColumn = () => {
+    if (editingCell && cells[0].length > 1) {
+      const { col } = editingCell;
+      
+      // Create updated arrays with the column removed
+      const updatedCells = cells.map(row => {
+        const newRow = [...row];
+        newRow.splice(col, 1);
+        return newRow;
+      });
+      
+      const updatedBoldCells = boldCells.map(row => {
+        const newRow = [...row];
+        newRow.splice(col, 1);
+        return newRow;
+      });
+      
+      const updatedItalicCells = italicCells.map(row => {
+        const newRow = [...row];
+        newRow.splice(col, 1);
+        return newRow;
+      });
+      
+      const updatedFontSizes = fontSizes.map(row => {
+        const newRow = [...row];
+        newRow.splice(col, 1);
+        return newRow;
+      });
+      
+      const updatedFontColors = fontColors.map(row => {
+        const newRow = [...row];
+        newRow.splice(col, 1);
+        return newRow;
+      });
+      
+      // Update state
+      setCells(updatedCells);
+      setBoldCells(updatedBoldCells);
+      setItalicCells(updatedItalicCells);
+      setFontSizes(updatedFontSizes);
+      setFontColors(updatedFontColors);
+      
+      // Clear editing cell
+      setEditingCell(null);
+    }
   };
 
   return (
@@ -188,6 +374,12 @@ const App = () => {
         onSave={handleSave}
         onLoad={handleLoad}
         onCreateChart={handleCreateChart}
+        onAddRow={handleAddRow}
+        onAddColumn={handleAddColumn}
+        onDeleteRow={handleDeleteRow}
+        onDeleteColumn={handleDeleteColumn}
+        onChangeFontSize={handleChangeFontSize}
+        onChangeFontColor={handleChangeFontColor}
       />
       
       <div className="max-w-[95%] mx-auto p-4">
@@ -200,6 +392,8 @@ const App = () => {
               setCells={updateCell} 
               boldCells={boldCells} 
               italicCells={italicCells} 
+              fontSizes={fontSizes}
+              fontColors={fontColors}
               setBoldCells={setBoldCells}
               setItalicCells={setItalicCells}
               setEditingCell={setEditingCell} 
