@@ -3,6 +3,13 @@
 ## Overview
 The Support Agent ChatBot is a web application that allows users to interact with a chatbot powered by a language model. The chatbot can answer questions based on the context retrieved from various documentation sources. This application is built using FastAPI for the backend and React for the frontend.
 
+## Screenshots
+Here are some screenshots of the application:
+
+![Chatbot Interface](images/screenshot1.png)
+![Chatbot Response](images/screenshot3.png)
+![Postman Response](images/screenshot2.png)
+
 ## Tech Stack
 - **Frontend**: 
   - React: A JavaScript library for building user interfaces.
@@ -61,9 +68,12 @@ The Support Agent ChatBot is a web application that allows users to interact wit
    ```
 3. Start the React application:
    ```bash
-   npm start
+   npm run dev
    ```
 4. The frontend will be accessible at `http://localhost:5173`.
 
 ## Conclusion
 The Support Agent ChatBot provides a seamless interface for users to get answers to their questions based on a variety of documentation sources. The combination of FastAPI and React allows for a responsive and efficient application that can be easily extended and maintained.
+
+## Note
+There was a problem in deployment of this chatbot, the backend couldn't be deployed on Render due to memory limit on free tier. I am attaching screenshots of the application and postman for api.

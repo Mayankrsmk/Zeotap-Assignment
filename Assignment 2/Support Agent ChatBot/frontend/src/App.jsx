@@ -46,7 +46,7 @@ const App = () => {
       {/* Chat Container */}
       <main className="flex-grow p-4 overflow-auto">
         <div className={`rounded-lg shadow-lg p-6 ${darkMode ? 'bg-gray-800' : 'bg-white'}`}>
-          <div className="h-96 overflow-y-auto mb-4">
+          <div className=" h-150 overflow-y-auto mb-4">
             {/* Chat Messages */}
             <div className="flex flex-col space-y-4">
               {responses.map((response, index) => (
