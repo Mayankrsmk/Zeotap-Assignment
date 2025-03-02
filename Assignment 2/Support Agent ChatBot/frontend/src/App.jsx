@@ -1,8 +1,30 @@
 import React, { useState } from 'react'
+import axios from 'axios'
 import { SunIcon, MoonIcon, UserIcon, ChatBubbleLeftIcon } from '@heroicons/react/24/solid';
+import { Spinner } from 'react-bootstrap';
 
 const App = () => {
   const [darkMode, setDarkMode] = useState(false);
+  const [question, setQuestion] = useState('');
+  const [responses, setResponses] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  const handleSend = async () => {
+    if (!question) return;
+
+    setResponses((prev) => [...prev, { text: question, type: 'user' }]);
+    setLoading(true);
+    
+    try {
+      const response = await axios.post('http://127.0.0.1:8000/chat', { question });
+      setResponses((prev) => [...prev, { text: response.data.response, type: 'bot' }]);
+      setQuestion('');
+    } catch (error) {
+      console.error('Error sending question:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={`flex flex-col h-screen ${darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
@@ -27,19 +49,19 @@ const App = () => {
           <div className="h-96 overflow-y-auto mb-4">
             {/* Chat Messages */}
             <div className="flex flex-col space-y-4">
-              <div className={`flex items-start p-3 rounded-lg self-start ${darkMode ? 'bg-cyan-700' : 'bg-cyan-100'}`}>
-                <div className="mr-2">
-                  <ChatBubbleLeftIcon className="h-6 w-6 text-white" />
+              {responses.map((response, index) => (
+                <div key={index} className={`flex items-start p-3 rounded-lg ${response.type === 'bot' ? (darkMode ? 'bg-cyan-700' : 'bg-cyan-100') : (darkMode ? 'bg-gray-700' : 'bg-gray-200')} self-${response.type === 'bot' ? 'start' : 'end'}`}>
+                  <div className="mr-2">
+                    {response.type === 'bot' ? <ChatBubbleLeftIcon className="h-6 w-6 text-white" /> : <UserIcon className="h-6 w-6 text-gray-800" />}
+                  </div>
+                  <p className={`${darkMode ? 'text-white' : 'text-gray-800'}`}>{response.text}</p>
                 </div>
-                <p className={`${darkMode ? 'text-white' : 'text-gray-800'}`}>Hello! How can I assist you today?</p>
-              </div>
-              <div className={`flex items-start p-3 rounded-lg self-end ${darkMode ? 'bg-gray-700' : 'bg-gray-200'}`}>
-                <div className="mr-2">
-                  <UserIcon className="h-6 w-6 text-gray-800" />
+              ))}
+              {loading && (
+                <div className="flex items-center justify-center p-3">
+                  <Spinner animation="border" variant="primary" />
                 </div>
-                <p className={`${darkMode ? 'text-white' : 'text-gray-800'}`}>I need help with integrating data.</p>
-              </div>
-              {/* Add more messages as needed */}
+              )}
             </div>
           </div>
 
@@ -47,10 +69,12 @@ const App = () => {
           <div className="flex">
             <input
               type="text"
+              value={question}
+              onChange={(e) => setQuestion(e.target.value)}
               placeholder="Type your message..."
               className={`flex-grow border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 ${darkMode ? 'bg-gray-700 text-white border-gray-600 focus:ring-cyan-500' : 'bg-white text-gray-800 focus:ring-cyan-500'}`}
             />
-            <button className={`ml-2 rounded-lg px-4 py-2 ${darkMode ? 'bg-cyan-500' : 'bg-cyan-600'} text-white hover:bg-cyan-700`}>
+            <button onClick={handleSend} className={`ml-2 rounded-lg px-4 py-2 ${darkMode ? 'bg-cyan-500' : 'bg-cyan-600'} text-white hover:bg-cyan-700`}>
               Send
             </button>
           </div>
