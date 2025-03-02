@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+beautifulsoup4
+langchain
+langchain-core
+langchain-community
+langchain-huggingface
+langchain-chroma
+transformers
+torch
+sentence-transformers
+bs4
