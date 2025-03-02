@@ -1,6 +1,6 @@
-# Project Overview
+# Overview
 
-This repository contains two assignments showcasing different applications built with modern web technologies.
+This repository contains two assignments.
 
 ## Assignment 1: Google Sheets Application
 
