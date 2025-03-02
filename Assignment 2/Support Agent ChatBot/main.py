@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from bs4 import BeautifulSoup
 from langchain.prompts import ChatPromptTemplate
@@ -18,6 +19,15 @@ import warnings
 warnings.filterwarnings("ignore", category=XMLParsedAsHTMLWarning)
 
 app = FastAPI()
+
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Adjust this to your frontend URL in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 model_name = "sentence-transformers/all-mpnet-base-v2"
 model_kwargs = {'device': 'cpu'}
@@ -91,13 +101,17 @@ def chat(request: QueryRequest):
         
         rag_chain = (
             RunnablePassthrough()
-            | prompt
+            | prompt.invoke
             | llm
             | StrOutputParser()
         )
         
         input_data = {"context": context_text, "question": request.question}
         response = rag_chain.invoke(input_data)
-        return {"response": response}
+
+        # Extract the answer from the response
+        answer = response.split("Answer:")[-1].strip()  # Get the part after "Answer:"
+        
+        return {"response": answer}  # Return only the answer
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error Occurred: {e}")
