@@ -35,3 +35,7 @@ To run the applications, follow the instructions in their respective directories
 
 1. **Assignment 1**: Navigate to `Assignment 1/google-sheets-app` and follow the setup instructions.
 2. **Assignment 2**: Navigate to `Assignment 2/Support Agent ChatBot` and follow the setup instructions.
+
+## Note
+There was a problem in deployment of Support Agent ChatBot. Backend could not be deployed due to memory limit of Render's free tier plan. I have attached screenshots
+in the Assignment 2 directory's Readme.
