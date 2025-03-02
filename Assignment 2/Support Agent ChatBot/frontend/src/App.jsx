@@ -83,7 +83,7 @@ const App = () => {
 
       {/* Footer */}
       <footer className={`text-center p-4 ${darkMode ? 'bg-gray-800' : 'bg-gray-200'}`}>
-        <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>© 2023 Chatbot Assistant. All rights reserved.</p>
+        <p className={`${darkMode ? 'text-gray-400' : 'text-gray-600'}`}>© 2025 Support Agent ChatBot.</p>
       </footer>
     </div>
   )
